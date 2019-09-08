@@ -1,0 +1,64 @@
+train <- read.csv('trainset_encoded1.csv',sep = ',')
+train_extract <- data.frame(train$LOCATION,train$INBRED,train$TESTER,train$YEAR)
+
+#Case-1
+train_extract$inbred <- as.numeric(as.factor(train_extract$train.INBRED))
+train_extract$tester <- as.numeric(as.factor(train_extract$train.TESTER))
+train_extract$location <- as.numeric(as.factor(train_extract$train.LOCATION))
+train_extract$year <- as.numeric(as.factor(train_extract$train.YEAR))
+test_case <- train_extract[1:100,]
+X <- as.matrix(test_case)
+
+(s <- svd(X))
+D <- diag(s$d)
+p <- s$u %*% D %*% t(s$v) #  X = U D V'
+q <- t(s$u) %*% X %*% s$v #  D = U' X V
+l <- data.frame(s$d)
+plot(s$d)
+
+#https://machinelearningmastery.com/singular-value-decomposition-for-machine-learning/
+D_tr <- as.matrix(as.data.frame(replace(D, D < 12,0)))
+D_ktr <- as.matrix(D_tr[apply(D_tr[,], 1, function(x) !all(x==0)),])
+D_ktr1 <- D_ktr[,1:2]
+s1 <- s$u[,1:2]
+v1 <- (s$v)[,1:2]
+v2 <- t(v1)
+X_final <- s1 %*% D_ktr1 %*% v2
+
+#Case-2
+
+train$YIELD <- NULL
+train$testerc <-as.numeric(as.factor(train$TESTER_CLUSTER))
+train$inbredc <-as.numeric(as.factor(train$INBRED_CLUSTER))
+train$inbred <- as.numeric(as.factor(train$INBRED))
+train$tester <- as.numeric(as.factor(train$TESTER))
+train$location <- as.numeric(as.factor(train$LOCATION))
+train$year <- as.numeric(as.factor(train$YEAR))
+test_case1 <- train[1:100,]
+X <- as.matrix(test_case1)
+
+test_case1$YEAR <- NULL
+test_case1$LOCATION <- NULL
+test_case1$INBRED_CLUSTER <- NULL
+test_case1$TESTER_CLUSTER <- NULL
+test_case1$TESTER <- NULL
+test_case1$INBRED <- NULL
+
+
+(s <- svd(X))
+D <- diag(s$d)
+p <- s$u %*% D %*% t(s$v) #  X = U D V'
+q <- t(s$u) %*% X %*% s$v #  D = U' X V
+l <- data.frame(s$d)
+plot(s$d)
+
+#https://machinelearningmastery.com/singular-value-decomposition-for-machine-learning/
+D_tr <- as.matrix(as.data.frame(replace(D, D < 4,0)))
+D_ktr <- as.matrix(D_tr[apply(D_tr[,], 1, function(x) !all(x==0)),])
+D_ktr1 <- D_ktr[,1:5]
+s1 <- s$u[,1:5]
+v1 <- (s$v)[,1:5]
+v2 <- t(v1)
+X_final <- s1 %*% D_ktr1 %*% v2
+
+
