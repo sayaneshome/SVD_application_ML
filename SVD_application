@@ -171,21 +171,6 @@ df.g <- graph_from_adjacency_matrix(X,mode = "directed")
 V(df.g)$name <- V(df.g)
 test2 <- as_long_data_frame(graph = df.g)
 
-df.g <- graph_from_adjacency_matrix(X,mode = "undirected")
-V(df.g)$name <- V(df.g)
-test2 <- as_long_data_frame(graph = df.g)
-
-df.g <- graph_from_adjacency_matrix(X,mode = "lower")
-V(df.g)$name <- V(df.g)
-test2 <- as_long_data_frame(graph = df.g)
-
-df.g <- graph_from_adjacency_matrix(X,mode = "upper")
-V(df.g)$name <- V(df.g)
-test2 <- as_long_data_frame(graph = df.g)
-
-df.g <- graph_from_adjacency_matrix(X,mode = "directed")
-V(df.h)$name <- V(df.h)
-test1 <- as_long_data_frame(graph = df.h)
 
 
 
