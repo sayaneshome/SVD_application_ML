@@ -1,0 +1,204 @@
+install.packages("scatterplot3d") # Install
+library("scatterplot3d") # load
+s3d <- scatterplot3d(training_data_wdoutNA$INBRED_CLUSTER,training_data_wdoutNA$TESTER_CLUSTER ,training_data_wdoutNA$YIELD,pch = 16, color="steelblue")
+my.lm <- lm(training_data_wdoutNA$YIELD ~ training_data_wdoutNA$INBRED_CLUSTER + training_data_wdoutNA$TESTER_CLUSTER)
+s3d$plane3d(my.lm)
+
+train <- read.csv('CC2020_train_final.csv',sep = ',')
+train$YEAR[train$YEAR == "16"] <- "0"
+train$YEAR[train$YEAR == "17"] <- "1"
+train$YEAR[train$YEAR == "18"] <- "2"
+View(train)
+levels(train$INBRED_CLUSTER)[levels(train$INBRED_CLUSTER)=="Cluster10"] <- "10"
+levels(train$INBRED_CLUSTER)[levels(train$INBRED_CLUSTER)=="Cluster11"] <- "11"
+levels(train$INBRED_CLUSTER)[levels(train$INBRED_CLUSTER)=="Cluster12"] <- "12"
+levels(train$INBRED_CLUSTER)[levels(train$INBRED_CLUSTER)=="Cluster13"] <- "13"
+levels(train$INBRED_CLUSTER)[levels(train$INBRED_CLUSTER)=="Cluster14"] <- "14"
+levels(train$INBRED_CLUSTER)[levels(train$INBRED_CLUSTER)=="Cluster15"] <- "15"
+levels(train$INBRED_CLUSTER)[levels(train$INBRED_CLUSTER)=="Cluster16"] <- "16"
+levels(train$INBRED_CLUSTER)[levels(train$INBRED_CLUSTER)=="Cluster17"] <- "17"
+levels(train$INBRED_CLUSTER)[levels(train$INBRED_CLUSTER)=="Cluster1"] <- "1"
+levels(train$INBRED_CLUSTER)[levels(train$INBRED_CLUSTER)=="Cluster2"] <- "2"
+levels(train$INBRED_CLUSTER)[levels(train$INBRED_CLUSTER)=="Cluster3"] <- "3"
+levels(train$INBRED_CLUSTER)[levels(train$INBRED_CLUSTER)=="Cluster4"] <- "4"
+levels(train$INBRED_CLUSTER)[levels(train$INBRED_CLUSTER)=="Cluster5"] <- "5"
+levels(train$INBRED_CLUSTER)[levels(train$INBRED_CLUSTER)=="Cluster6"] <- "6"
+levels(train$INBRED_CLUSTER)[levels(train$INBRED_CLUSTER)=="Cluster7"] <- "7"
+levels(train$INBRED_CLUSTER)[levels(train$INBRED_CLUSTER)=="Cluster8"] <- "8"
+levels(train$INBRED_CLUSTER)[levels(train$INBRED_CLUSTER)=="Cluster9"] <- "9"
+
+levels(train$TESTER_CLUSTER)[levels(train$TESTER_CLUSTER)=="Cluster10"] <- "10"
+levels(train$TESTER_CLUSTER)[levels(train$TESTER_CLUSTER)=="Cluster11"] <- "11"
+levels(train$TESTER_CLUSTER)[levels(train$TESTER_CLUSTER)=="Cluster12"] <- "12"
+levels(train$TESTER_CLUSTER)[levels(train$TESTER_CLUSTER)=="Cluster13"] <- "13"
+levels(train$TESTER_CLUSTER)[levels(train$TESTER_CLUSTER)=="Cluster14"] <- "14"
+levels(train$TESTER_CLUSTER)[levels(train$TESTER_CLUSTER)=="Cluster15"] <- "15"
+levels(train$TESTER_CLUSTER)[levels(train$TESTER_CLUSTER)=="Cluster16"] <- "16"
+levels(train$TESTER_CLUSTER)[levels(train$TESTER_CLUSTER)=="Cluster17"] <- "17"
+levels(train$TESTER_CLUSTER)[levels(train$TESTER_CLUSTER)=="Cluster1"] <- "1"
+levels(train$TESTER_CLUSTER)[levels(train$TESTER_CLUSTER)=="Cluster2"] <- "2"
+levels(train$TESTER_CLUSTER)[levels(train$TESTER_CLUSTER)=="Cluster3"] <- "3"
+levels(train$TESTER_CLUSTER)[levels(train$TESTER_CLUSTER)=="Cluster4"] <- "4"
+levels(train$TESTER_CLUSTER)[levels(train$TESTER_CLUSTER)=="Cluster5"] <- "5"
+levels(train$TESTER_CLUSTER)[levels(train$TESTER_CLUSTER)=="Cluster6"] <- "6"
+levels(train$TESTER_CLUSTER)[levels(train$TESTER_CLUSTER)=="Cluster7"] <- "7"
+levels(train$TESTER_CLUSTER)[levels(train$TESTER_CLUSTER)=="Cluster8"] <- "8"
+levels(train$TESTER_CLUSTER)[levels(train$TESTER_CLUSTER)=="Cluster9"] <- "9"
+
+
+write.csv(r1,"trainset_encoded1.csv")
+test_case_opt <- read.csv('optdigits.tes',sep = ',')
+View(test_case_opt)
+View(test_case_opt)
+test_case_opt <- read.csv('optdigits.tes',sep = ',',header = TRUE)
+View(test_case_opt)
+test_case_opt1 <- read.csv('optdigits.tra',sep = ',')
+
+
+library(tfestimators)
+library(tfdatasets)
+library(tensorflow)
+set.seed(500)
+
+
+feature_cols <- feature_columns(
+  tf$feature_column$numeric_column("YEAR"),
+  tf$feature_column$numeric_column("LOCATION"),
+  tf$feature_column$numeric_column("INBRED"),
+  tf$feature_column$numeric_column("INBRED_CLUSTER"),
+  tf$feature_column$numeric_column("TESTER"),
+  tf$feature_column$numeric_column("TESTER_CLUSTER")
+)
+
+row_indices <- sample(1:nrow(donor_data), 
+                      size = 0.8 * nrow(donor_data))
+donor_data_train <- donor_data[row_indices, ]
+donor_data_test <- donor_data[-row_indices, ]
+
+donor_pred_fn <- function(data) {
+  input_fn(data, 
+           features = c("YEAR","LOCATION","INBRED","INBRED_CLUSTER","TESTER","TESTER_CLUSTER"), 
+           response = "YIELD")
+}
+
+classifier <- dnn_classifier(
+  feature_columns = feature_cols, 
+  hidden_units = c(80, 40, 30), 
+  n_classes = 2, 
+  label_vocabulary = c("N", "Y"))
+
+library(neuralnet)
+
+data <- donor_data[1:1000,]
+index <- sample(1:nrow(data),round(0.75*nrow(data)))
+train <- data[index,]
+test <- data[-index,]
+lm.fit <- glm(YIELD~., data=train)
+summary(lm.fit)
+pr.lm <- predict(lm.fit,test) #error
+MSE.lm <- sum((pr.lm - test$medv)^2)/nrow(test)
+nn=neuralnet(f,train,hidden = 3,linear.output = TRUE)
+m <- model.matrix(~ YEAR + INBRED_CLUSTER + TESTER_CLUSTER + YIELD,
+                  data = train
+)
+r <- neuralnet(
+  YIELD~abs(INBRED_CLUSTER-TESTER_CLUSTER),
+  data=m, hidden=10, threshold=0.01
+)
+f <- as.formula(paste("YIELD~", paste(n[!n %in% "YIELD"], collapse = " + ")))
+nn=neuralnet(f,train,hidden = 3,linear.output = TRUE)
+
+Predict=compute(nn,test)
+predictions <- data.frame(Predict$net.result)
+
+nn=neuralnet(YIELD~.,train,hidden = 20,linear.output = TRUE,act.fct = 'ReLu')
+plot(nn)
+Predict=compute(nn,test)
+predictions <- data.frame(Predict$net.result)
+colnames(predictions)[1] <- "predictions"
+predictions$realvalues <- test$YIELD
+predictions$accuracy <- (predictions$realvalues-predictions$predictions)/predictions$realvalues
+
+par(mfrow=c(4,3))
+plot(train$YEAR,train$YIELD,pch = 20,ylab = 'YIELD',xlab = 'YEAR')
+axis(side = 1, lwd = 2)
+axis(side = 2, lwd = 2)
+plotdist(train$YEAR, histo = TRUE, demp = TRUE)
+plot(train$INBRED_CLUSTER,train$YIELD,pch = 20,ylab = 'YIELD',xlab = 'inbred')
+axis(side = 1, lwd = 2)
+axis(side = 2, lwd = 2)
+plotdist(train$INBRED_CLUSTER, histo = TRUE, demp = TRUE)
+plot(train$TESTER_CLUSTER,train$YIELD,pch = 20,ylab = 'YIELD',xlab = 'tester')
+axis(side = 1, lwd = 2)
+axis(side = 2, lwd = 2)
+plotdist(train$TESTER_CLUSTER, histo = TRUE, demp = TRUE)
+
+library(igraph)
+train <- read.csv('trainset_encoded1.csv',sep = ',')
+train_extract <- data.frame(train$LOCATION,train$INBRED,train$TESTER)
+df.g <- graph.data.frame(train_extract, directed = TRUE)
+X <- as_adjacency_matrix(df.g)
+
+(s <- svd(X))
+D <- diag(s$d)
+p <- s$u %*% D %*% t(s$v) #  X = U D V'
+q <- t(s$u) %*% X %*% s$v #  D = U' X V
+l <- data.frame(s$d)
+plot(s$d)
+
+#https://machinelearningmastery.com/singular-value-decomposition-for-machine-learning/
+
+D_tr <- as.data.frame(replace(D, D < 2.476636e-13,0))
+D_ktr <- as.matrix(D_tr[apply(D_tr[,-1], 1, function(x) !all(x==0)),])
+D_ktr1 <- D_ktr[,1:857]
+s1 <- s$u[,1:857]
+v1 <- (s$v)[,1:857]
+v2 <- t(v1)
+X_final <- s1 %*% D_ktr1 %*% v2
+
+df.h <- graph_from_adjacency_matrix(X_final,mode = "upper")
+V(df.h)$name <- V(df.h)
+test2 <- as_long_data_frame(graph = df.h)
+colnames(test2)[5] <- "train.INBRED"
+colnames(test2)[4] <- "train.LOCATION"
+test2$from <- NULL
+test2$to <- NULL
+
+
+v2 <- t(v1)
+X_final <- s1 %*% D_ktr1 %*% v2
+df.g <- graph_from_adjacency_matrix(X,mode = "directed")
+V(df.g)$name <- V(df.g)
+test2 <- as_long_data_frame(graph = df.g)
+
+df.g <- graph_from_adjacency_matrix(X,mode = "undirected")
+V(df.g)$name <- V(df.g)
+test2 <- as_long_data_frame(graph = df.g)
+
+df.g <- graph_from_adjacency_matrix(X,mode = "lower")
+V(df.g)$name <- V(df.g)
+test2 <- as_long_data_frame(graph = df.g)
+
+df.g <- graph_from_adjacency_matrix(X,mode = "upper")
+V(df.g)$name <- V(df.g)
+test2 <- as_long_data_frame(graph = df.g)
+
+df.g <- graph_from_adjacency_matrix(X,mode = "directed")
+V(df.h)$name <- V(df.h)
+test1 <- as_long_data_frame(graph = df.h)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
