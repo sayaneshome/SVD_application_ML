@@ -1,235 +1,232 @@
-SVD Application & Machine Learning Pipeline (R)
+# SVD Application & Machine Learning Pipeline (R)
 
-This repository contains three self-contained R scripts that collectively implement a workflow for:
+*A hybrid of SVD, graph analytics, and machine learning models for yield prediction.*
 
-Preprocessing hybrid crop yield data
+---
 
-Cluster encoding for INBRED and TESTER lines
+## 📌 Overview
 
-Visualization using 3D scatter-plots and regression plane fitting
+This repository contains three R scripts implementing a workflow for:
 
-Classical ML models (GLM, linear regression)
+- Preprocessing hybrid crop yield data  
+- Encoding cluster information for **INBRED** and **TESTER** lines  
+- Visualizing yield in 3D with regression plane fitting  
+- Building classical and neural ML models  
+- Performing graph-based analysis using **SVD**  
+- Prototyping CNN / DNN structures
 
-Neural networks using neuralnet
+The focus is on exploring how **matrix factorization + graph structure + ML models** can be combined for yield prediction and heterotic pattern discovery.
 
-TensorFlow DNN classifiers in R
+---
 
-Graph-based analysis using igraph
+## 📂 Repository Structure
 
-Matrix factorization (SVD) and low-rank reconstruction
-
-Early CNN experimentation
-
-The workflow demonstrates multiple ML + graph-analytic approaches for yield prediction and heterotic pattern understanding.
-
-📂 Repository Structure
+```text
 SVD_application_ML-master/
 │
-├── SVD_application         # Main script: preprocessing, encoding, NN, GLM, TF, graph SVD
-├── SVD_finalfile           # Cleaned summary version of SVD workflow
-└── cnn_on_progress         # Early prototype: CNN model development
+├── SVD_application      # Main end-to-end pipeline (preprocessing, ML, SVD, graph)
+├── SVD_finalfile        # Clean summary of SVD + graph reconstruction
+└── cnn_on_progress      # Concept / prototype for CNN-style models in R/TensorFlow
 
-
-All files are plain-text R scripts without extensions.
-
-📌 Script Descriptions
-1. SVD_application — Full Pipeline (Primary Script)
-
-This is the main and most comprehensive script.
-It includes the following:
-
-a. Visualization
-
-Installs & loads scatterplot3d
-
-Plots 3D scatter of
-INBRED_CLUSTER × TESTER_CLUSTER × YIELD
-
-Fits regression plane using lm() and overlays it.
-
-b. Data Preparation
-
-Reads dataset: CC2020_train_final.csv
-
-Encodes YEAR values as 0/1/2
-
-Converts cluster categories:
-Cluster1 → 1, …, Cluster17 → 17
-
-Writes encoded dataset as:
-trainset_encoded1.csv
-
-c. TensorFlow DNN Classifier
-
-Uses:
-
-tfestimators
-tfdatasets
-tensorflow
-
-
-Feature columns:
-
-YEAR
-
-LOCATION
-
-INBRED
-
-INBRED_CLUSTER
-
-TESTER
-
-TESTER_CLUSTER
-
-Builds a DNN classifier with hidden layers:
-80 → 40 → 30
-
-d. Classical ML Models
-
-Linear regression
-
-GLM (YIELD ~ .)
-
-Train/test split
-
-Neural network using neuralnet
-
-Computes MSE, predictions, accuracy
-
-Visualization using plotdist() and base R plots
-
-e. Graph + SVD Analysis
-
-Creates directed graph from
-(LOCATION, INBRED, TESTER)
-
-Converts graph to adjacency matrix
-
-Performs SVD
-
-Zeroes out near-zero singular values
-
-Reconstructs matrix using truncated components
-
-Builds reconstructed graph
-
-Converts graph into long-data format with edge listings
-
-This section demonstrates how SVD can reveal latent structure in hybrid relationships.
-
-2. SVD_finalfile — Clean Summary Script
-
-This file is a simplified, cleaner version of the SVD workflow.
-
-It contains:
-
-SVD decomposition
-
-Filtering of small singular values
-
-Low-rank reconstruction
-
-Graph reconstruction
-
-Use this script when you only want the SVD + graph component without ML or encoding steps.
-
-3. cnn_on_progress — CNN Prototype (Work in Progress)
-
-A short conceptual outline for:
-
-Feature columns
-
-DNN / CNN definitions
-
-TensorFlow classifier structure
-
-This file is not a complete model but contains early experimentation ideas and reference function signatures.
 
 🔧 Dependencies
-CRAN Packages
-scatterplot3d
-neuralnet
-igraph
-tensorflow
-tfestimators
-tfdatasets
+
+Below is a clean, GitHub-friendly dependencies block.
+
+R Version
+
+Tested on:
+
+R ≥ 4.0
+
+Required CRAN Packages
+
+Install them in one step:
+
+install.packages(c(
+  "scatterplot3d",
+  "neuralnet",
+  "igraph",
+  "ggplot2"
+))
 
 
-Install TensorFlow for R:
+These packages support:
 
-install.packages("tensorflow")
+scatterplot3d → 3D visualization
+
+neuralnet → feed-forward ANN models
+
+igraph → graph + adjacency matrix operations
+
+ggplot2 → additional plotting (optional)
+
+TensorFlow + TFDatasets + TFEestimators
+
+Install backend packages:
+
+install.packages(c("tensorflow", "tfdatasets", "tfestimators"))
+
+
+Then install TensorFlow itself:
+
 tensorflow::install_tensorflow()
 
-🚀 How to Run
-1. Run the full pipeline
-source("SVD_application")
+
+TensorFlow is needed for:
+
+DNN classifier
+
+CNN experiment prototypes
+
+Feature column APIs for structured data
+
+Optional (Recommended)
+install.packages("plotrix")   # for visual distributions
+install.packages("reshape2")  # for matrix reshaping
+install.packages("dplyr")     # for data manipulation
+
+🧠 Script Breakdown
+1️⃣ SVD_application — Main Pipeline
+
+This script runs everything:
+
+Data cleaning
+
+Year & cluster encoding
+
+3D scatterplot + regression plane
+
+GLM modeling
+
+Neural networks (several variants)
+
+TensorFlow DNN
+
+Graph construction
+
+SVD decomposition + reconstruction
+
+Edge list extraction
+
+Key operations include:
+
+s3d <- scatterplot3d(...)
+my.lm <- lm(YIELD ~ INBRED_CLUSTER + TESTER_CLUSTER)
+s3d$plane3d(my.lm)
 
 
-This will:
+Encoding:
 
-Preprocess the dataset
-
-Fit regression & NN models
-
-Train TensorFlow classifier
-
-Perform graph + SVD analysis
-
-2. Run only SVD + graph reconstruction
-source("SVD_finalfile")
-
-3. View CNN prototype
-file.edit("cnn_on_progress")
-
-📊 Outputs
-
-Depending on which parts of the script are executed, you will obtain:
-
-Encoded dataset: trainset_encoded1.csv
-
-3D scatterplots + regression plane
-
-Neural network prediction table:
-
-predictions | realvalues | accuracy
+levels(train$INBRED_CLUSTER)[levels(train$INBRED_CLUSTER)=="Cluster1"] <- "1"
+...
 
 
-Plots of feature distributions
+Neural network:
+
+nn <- neuralnet(
+  YIELD ~ .,
+  train,
+  hidden = 20,
+  linear.output = TRUE,
+  act.fct = "ReLu"
+)
+
+
+Graph & SVD:
+
+df.g <- graph.data.frame(train_extract, directed = TRUE)
+X     <- as_adjacency_matrix(df.g)
+s     <- svd(X)
+
+2️⃣ SVD_finalfile — Clean SVD Workflow Only
+
+Contains only:
+
+adjacency → SVD
+
+filtering singular values
+
+reconstructing low-rank matrix
+
+rebuilding graph
+
+producing long-format edge table
+
+Perfect for experiments with graph embeddings.
+
+3️⃣ cnn_on_progress — Prototype CNN Work
+
+Contains:
+
+Feature column definitions
+
+Sketch of TensorFlow classifier structures
+
+Notes for future image/tabular CNN models
+
+Not a final model — conceptual only.
+
+📊 Typical Outputs
+
+You will obtain:
+
+trainset_encoded1.csv (encoded dataset)
+
+3D cluster plot with regression plane
+
+GLM summary
+
+Neural net predictions
+
+Accuracy table
 
 Singular value spectrum plot
 
-Long-format graph edges from adjacency matrix
+Low-rank reconstructed adjacency matrix
 
-✨ Purpose of the Project
+Graph edge lists (raw & reconstructed)
 
-The repository demonstrates a hybrid analytical approach combining:
+▶️ How to Run
 
-Yield prediction
+Clone this repo
 
-Cluster feature engineering
+Set working directory in R:
 
-Deep learning in R
+setwd("path/to/SVD_application_ML-master")
 
-Graph structural analysis
 
-Low-rank matrix approximation
+Run the full pipeline:
 
-Such workflows are useful for:
+source("SVD_application")
 
-Hybrid performance modeling
 
-Heterotic pattern detection
+Run only SVD:
 
-Latent feature extraction
+source("SVD_finalfile")
 
-Low-rank graph embeddings
 
-Experimental comparison of ML methods
+Inspect CNN prototype:
+
+file.edit("cnn_on_progress")
+
+💡 Use Cases
+
+Yield prediction benchmarking
+
+Studying INBRED–TESTER compatibility
+
+Heterotic group analysis
+
+Graph-based feature extraction
+
+Low-rank structure discovery
+
+Neural vs classical ML comparisons
+
+TensorFlow model experimentation
 
 📬 Contact
-
-For questions, improvements, or collaboration:
 
 Sayane Shome
 📧 sayaneshome1@gmail.com
